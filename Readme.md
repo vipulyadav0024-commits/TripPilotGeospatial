@@ -10,7 +10,6 @@
 | 🖥️ **Frontend (app)** | [https://trip-pilot-geospatial.vercel.app](https://trip-pilot-geospatial.vercel.app) | Vercel |
 | ⚙️ **Backend (API)** | [https://trippilot-backend-mtnj.onrender.com](https://trippilot-backend-mtnj.onrender.com) | Render |
 | ❤️ **Health check** | [https://trippilot-backend-mtnj.onrender.com/health](https://trippilot-backend-mtnj.onrender.com/health) | Render |
-| 🗄️ **Database** | MongoDB Atlas (M0 free cluster) | MongoDB Atlas |
 | 💻 **Source code** | [https://github.com/vipulyadav0024-commits/TripPilotGeospatial](https://github.com/vipulyadav0024-commits/TripPilotGeospatial) | GitHub |
 
 ### Health status
