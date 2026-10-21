@@ -2,12 +2,41 @@
 
 > AI-powered, map-driven travel planning application — generate personalized day-by-day itineraries with every stop geocoded and plotted on an interactive map, optimize each day's visiting order to cut travel distance, discover what's nearby, estimate budgets, and auto-generate weather-aware packing lists instantly.
 
-![React](https://img.shields.io/badge/React-19-blue) ![Node](https://img.shields.io/badge/Node.js-18+-green) ![MongoDB](https://img.shields.io/badge/MongoDB-2dsphere%20Geospatial-brightgreen) ![Leaflet](https://img.shields.io/badge/Leaflet-OpenStreetMap-199900) ![Gemini](https://img.shields.io/badge/Google-Gemini%202.5%20Flash-orange) ![License](https://img.shields.io/badge/license-Educational-lightgrey)
+
+## 🌐 Live Demo
+
+| Part | URL | Hosted on |
+|------|-----|-----------|
+| 🖥️ **Frontend (app)** | [https://trip-pilot-geospatial.vercel.app](https://trip-pilot-geospatial.vercel.app) | Vercel |
+| ⚙️ **Backend (API)** | [https://trippilot-backend-mtnj.onrender.com](https://trippilot-backend-mtnj.onrender.com) | Render |
+| ❤️ **Health check** | [https://trippilot-backend-mtnj.onrender.com/health](https://trippilot-backend-mtnj.onrender.com/health) | Render |
+| 🗄️ **Database** | MongoDB Atlas (M0 free cluster) | MongoDB Atlas |
+| 💻 **Source code** | [https://github.com/vipulyadav0024-commits/TripPilotGeospatial](https://github.com/vipulyadav0024-commits/TripPilotGeospatial) | GitHub |
+
+### Health status
+
+| Service | Status | Last verified |
+|---------|--------|---------------|
+| Backend API (`/health`) | ✅ Up | 21 Oct 2026 |
+| Frontend (Vercel) | ✅ Deployed | 21 Oct 2026 |
+| MongoDB Atlas | ✅ Connected | 21 Oct 2026 |
+
+Expected response from the health endpoint:
+
+```json
+{ "status": "up", "message": "TripPilot API is running" }
+```
+
+> ⏳ **Heads-up:** the backend runs on Render's **free tier**, which goes to sleep after about 15 minutes of inactivity.
+> The **first request after a quiet period can take 30–60 seconds** while the server wakes up. Open the
+> [health link](https://trippilot-backend-mtnj.onrender.com/health) first to wake it, then use the app.
+> Opening the bare backend URL shows `Cannot GET /` — this is normal, because the API has no homepage.
 
 ---
 
 ## 📋 Table of Contents
 
+- [Live Demo](#-live-demo)
 - [Overview](#overview)
 - [Features](#features)
 - [Tech Stack & Justification](#tech-stack--justification)
@@ -20,7 +49,7 @@
 - [Getting Started](#getting-started)
 - [Environment Variables](#environment-variables)
 - [API Reference](#api-reference)
-- [Deployment](#deployment)
+- [Deployment Guide (Render + Vercel + Atlas)](#deployment-guide-render--vercel--atlas)
 - [Screenshots](#screenshots)
 - [Known Limitations](#known-limitations)
 - [Future Enhancements](#future-enhancements)
@@ -34,10 +63,10 @@
 
 Each user's data is completely isolated — no user can access or modify another user's trips. The app supports live USD/INR currency conversion, responsive design across all screen sizes, and gracefully falls back to mock data when the Gemini API key is not configured.
 
-| Part     | Stack                                              | Default URL           |
-|----------|-----------------------------------------------------|-----------------------|
-| Frontend | React 19 + Vite + Tailwind CSS + Leaflet/OSM        | http://localhost:5173 |
-| Backend  | Node.js + Express + MongoDB (2dsphere) + Nominatim + OSRM | http://localhost:5000 |
+| Part     | Stack                                              | Local URL             | Live URL |
+|----------|-----------------------------------------------------|-----------------------|----------|
+| Frontend | React 19 + Vite + Tailwind CSS + Leaflet/OSM        | http://localhost:5173 | https://trip-pilot-geospatial.vercel.app |
+| Backend  | Node.js + Express + MongoDB (2dsphere) + Nominatim + OSRM | http://localhost:5000 | https://trippilot-backend-mtnj.onrender.com |
 
 ---
 
@@ -171,7 +200,9 @@ The assignment listed Next.js as a *preferred* stack, not a mandatory one. I cho
 ## Project Structure
 
 ```
-TripPilotTravelPlanner/
+TripPilotGeospatial/
+├── Readme.md
+├── .gitignore
 ├── assets/
 │   ├── favicon.png
 │   ├── TravelApp1.jpg             # Screenshot - Home page
@@ -203,6 +234,8 @@ TripPilotTravelPlanner/
 │   └── server.js                  # Express entry point
 │
 └── frontend/
+    ├── vercel.json                    # SPA rewrite so page refreshes work on Vercel
+    ├── .env.example                   # VITE_API_URL template
     └── src/
         ├── components/
         │   ├── LandingPage.jsx        # Marketing / home page
@@ -337,8 +370,8 @@ Storing the exchange rate at trip creation time rather than fetching it live on 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/virendrasahu/AI-Travel-Planner.git
-cd AI-Travel-Planner
+git clone https://github.com/vipulyadav0024-commits/TripPilotGeospatial.git
+cd TripPilotGeospatial
 ```
 
 ### 2. Setup Backend
@@ -371,10 +404,10 @@ Frontend starts at **http://localhost:5173**
 
 ```env
 PORT=5000
-MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/trippilot-travel
+MONGO_URI=mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/trippilot?retryWrites=true&w=majority
 JWT_SECRET=your_super_secure_random_secret_key
 GEMINI_API_KEY=your_google_gemini_api_key
-CORS_ORIGINS=https://your-frontend.vercel.app
+CORS_ORIGINS=https://trip-pilot-geospatial.vercel.app
 GEOCODER_USER_AGENT=TripPilot-Geospatial-Travel-System/1.0 (your-email@example.com)
 ```
 
@@ -396,18 +429,21 @@ GEOCODER_USER_AGENT=TripPilot-Geospatial-Travel-System/1.0 (your-email@example.c
 VITE_API_URL=http://localhost:5000
 ```
 
-> For production, set `VITE_API_URL` to your deployed backend URL (e.g., `https://your-backend.onrender.com`).
+> For production, set `VITE_API_URL` to your deployed backend URL — this project uses `https://trippilot-backend-mtnj.onrender.com` (no trailing slash).
+> `VITE_` variables are baked in at build time, so **redeploy Vercel after changing it**.
 
 ---
 
 ## API Reference
 
-Base URL: `http://localhost:5000`
+Base URL (local): `http://localhost:5000`  
+Base URL (live): `https://trippilot-backend-mtnj.onrender.com`
 
 ### Health Check
 ```
 GET /health
 ```
+Try it live: [https://trippilot-backend-mtnj.onrender.com/health](https://trippilot-backend-mtnj.onrender.com/health)
 
 ### Authentication
 
@@ -457,27 +493,104 @@ GET /health
 
 ---
 
-## Deployment
+## Deployment Guide (Render + Vercel + Atlas)
 
-### Backend — Render.com
-1. Push backend folder to GitHub
-2. Create a new **Web Service** on [render.com](https://render.com)
-3. Set root directory to `backend`
-4. Add environment variables in the Render dashboard:
-   - `MONGO_URI`, `JWT_SECRET`, `GEMINI_API_KEY`, `PORT=5000`
-5. Deploy — Render provides a public HTTPS URL
+Architecture in production:
 
-### Frontend — Vercel
-1. Push frontend folder to GitHub
-2. Import project on [vercel.com](https://vercel.com)
-3. Set root directory to `frontend`
-4. Add environment variable:
-   - `VITE_API_URL=https://your-backend.onrender.com`
-5. Deploy — Vercel provides a public HTTPS URL
+```
+Browser ──► Vercel (React frontend) ──► Render (Express API) ──► MongoDB Atlas
+                                              │
+                                              ├──► Google Gemini API
+                                              ├──► OpenStreetMap Nominatim (geocoding)
+                                              └──► OSRM (road routing)
+```
+
+### 1. Database — MongoDB Atlas
+1. Create a free **M0** cluster at [mongodb.com/atlas](https://www.mongodb.com/atlas).
+2. **Database Access** → add a user (use a letters-and-numbers password to avoid URL-encoding issues).
+3. **Network Access** → add `0.0.0.0/0` (Render's free tier has no fixed IP).
+4. **Connect → Drivers** → copy the connection string and add the database name before the `?`:
+   ```
+   mongodb+srv://USER:PASSWORD@cluster0.xxxxx.mongodb.net/trippilot?retryWrites=true&w=majority
+   ```
+
+### 2. Backend — Render
+1. Push the repo to GitHub.
+2. Render → **New + → Web Service** → connect the repo.
+3. Settings:
+
+   | Setting | Value |
+   |---|---|
+   | Root Directory | `backend` |
+   | Runtime | Node |
+   | Build Command | `npm install` |
+   | Start Command | `npm start` |
+   | Instance Type | Free |
+
+4. Environment variables:
+
+   | Key | Value |
+   |---|---|
+   | `MONGO_URI` | your Atlas connection string |
+   | `JWT_SECRET` | a long random string |
+   | `GEMINI_API_KEY` | your Google AI Studio key |
+   | `GEOCODER_USER_AGENT` | `TripPilot/1.0 (your-email@example.com)` |
+   | `CORS_ORIGINS` | your Vercel URL (added in step 4 below) |
+
+   `PORT` is set by Render automatically.
+5. Deploy, then open `/health` on your service URL to confirm it is up.
+
+### 3. Frontend — Vercel
+1. Make sure `frontend/vercel.json` exists (it is already in this repo):
+   ```json
+   { "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }
+   ```
+   Without it, refreshing any page except `/` returns a 404.
+2. Vercel → **Add New → Project** → import the repo.
+3. Settings:
+
+   | Setting | Value |
+   |---|---|
+   | Framework Preset | Vite |
+   | Root Directory | `frontend` |
+   | Build Command | `npm run build` |
+   | Output Directory | `dist` |
+
+4. Environment variable: `VITE_API_URL` = your Render URL (no trailing `/`).
+5. Deploy.
+
+### 4. Connect frontend and backend (CORS)
+The backend only accepts requests from approved origins. After the first Vercel deploy:
+1. Render → your service → **Environment** → add
+   `CORS_ORIGINS` = `https://trip-pilot-geospatial.vercel.app` (no trailing slash, no spaces).
+2. Save — Render redeploys automatically.
+3. Hard-refresh the site (Ctrl + Shift + R) and register an account.
+
+To allow several origins (for example a custom domain), separate them with commas.
+
+### Troubleshooting
+
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| Browser console: *blocked by CORS policy* / "Failed to fetch" | `CORS_ORIGINS` missing or does not match the Vercel URL exactly | Set it to the exact origin, no trailing `/`, then wait for Render to redeploy |
+| Backend URL shows `Cannot GET /` | Normal — the API has no homepage | Use `/health` |
+| First request is very slow | Render free tier was asleep | Wait 30–60 s, or open `/health` first |
+| "Cannot reach the server" in the app | `VITE_API_URL` wrong, or Vercel not redeployed after changing it | Fix the variable and redeploy Vercel |
+| 404 after refreshing a page on Vercel | `vercel.json` rewrite missing | Add `frontend/vercel.json` and redeploy |
+| Backend crashes on start / `Error connecting to MongoDB` | Wrong password in `MONGO_URI` or Atlas IP allowlist | Check credentials and that `0.0.0.0/0` is allowed |
+| Trips show sample data and a notice | `GEMINI_API_KEY` missing or invalid | Add a valid key in Render |
+| Some map pins marked *approximate* | Nominatim/OSRM free-tier limits | Use **Locate missing stops** in the map panel |
+
+### Keeping secrets safe
+- Never commit `.env` files (they are in `.gitignore`).
+- Never paste real passwords or API keys into chats, issues, or this README.
+- If a key or password is ever exposed, rotate it immediately (Atlas → Database Access, Google AI Studio → API keys) and update it in Render.
 
 ---
 
 ## Screenshots
+
+Captured from the live app at [https://trip-pilot-geospatial.vercel.app](https://trip-pilot-geospatial.vercel.app).
 
 ### Home Page
 <p align="center">
@@ -550,7 +663,7 @@ GET /health
 - JWT tokens expire after 7 days
 - All trip endpoints verify `userId` matches the authenticated token owner
 - `.env` file is gitignored and never committed to version control
-- CORS configured to allow only the frontend origin
+- CORS allow-list: only localhost (dev), the configured Vercel origin and anything listed in `CORS_ORIGINS` can call the API
 - Exponential backoff prevents API key abuse under rate-limiting scenarios
 
 ---
