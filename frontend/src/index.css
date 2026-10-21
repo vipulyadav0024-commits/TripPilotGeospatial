@@ -1,0 +1,206 @@
+@import "tailwindcss";
+
+@theme {
+  --color-slate-750: #e2e8f0;
+  /* Light slate border color in light mode */
+
+  /* TripPilot brand palette — coral primary, sun + lagoon accents, ink navy, cream paper */
+  --color-brand-50: #fff1ee;
+  --color-brand-100: #ffe1db;
+  --color-brand-200: #ffc7bc;
+  --color-brand-300: #ffa593;
+  --color-brand-400: #ff8570;
+  --color-brand-500: #ff6452;
+  --color-brand-600: #f0442f;
+  --color-brand-700: #cc3220;
+  --color-brand-800: #a32a1d;
+  --color-brand-900: #7c231a;
+
+  --color-sun-50: #fff8e8;
+  --color-sun-100: #ffedc2;
+  --color-sun-300: #ffd685;
+  --color-sun-400: #ffc65c;
+  --color-sun-500: #ffb238;
+  --color-sun-600: #f2941a;
+  --color-sun-700: #c97511;
+
+  --color-lagoon-50: #e8fbfa;
+  --color-lagoon-100: #c7f3f0;
+  --color-lagoon-300: #6bd8d3;
+  --color-lagoon-400: #33c2be;
+  --color-lagoon-500: #0ea5a5;
+  --color-lagoon-600: #0b8686;
+  --color-lagoon-700: #086868;
+
+  --color-ink-800: #1e2e52;
+  --color-ink-900: #16223d;
+  --color-ink-950: #0e1729;
+
+  --color-cream-50: #fff7ec;
+  --color-cream-100: #fdeedc;
+
+  --font-display: 'Baloo 2', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background-color: #fff7ec;
+  /* cream-50 background */
+  color: #16223d;
+  /* ink-900 primary text */
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Landing page section scroll animations */
+@keyframes section-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes section-highlight {
+  0% {
+    transform: scale(1);
+  }
+
+  40% {
+    transform: scale(1.008);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.landing-section {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+
+.landing-section.section-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.landing-section.section-nav-target {
+  animation: section-highlight 0.55s ease-out;
+}
+
+.nav-section-link {
+  position: relative;
+}
+
+.nav-section-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to right, #4f46e5, #7c3aed);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s ease-out;
+  border-radius: 1px;
+}
+
+.nav-section-link:hover::after,
+.nav-section-link.nav-active::after {
+  transform: scaleX(1);
+}
+
+/* Custom animation configurations for smooth dashboard transitions */
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-down {
+  animation: slide-down 0.25s ease-out forwards;
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-4px);
+  }
+
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out forwards;
+}
+
+.animate-zoom-in {
+  animation: zoom-in 0.2s ease-out forwards;
+}
+
+.animate-shake {
+  animation: shake 0.3s ease-in-out;
+}
+
+.animate-spin-slow {
+  animation: spin 8s linear infinite;
+}
+
+@keyframes gentle-bob {
+  0%, 100% {
+    transform: translateY(0) rotate(-6deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(-2deg);
+  }
+}
+
+.animate-gentle-bob {
+  animation: gentle-bob 4s ease-in-out infinite;
+}
