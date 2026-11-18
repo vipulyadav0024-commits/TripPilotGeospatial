@@ -18,12 +18,22 @@ const configuredOrigins = (process.env.CORS_ORIGINS || '')
   .map((o) => o.trim())
   .filter(Boolean);
 
+const allowedOrigins = [
+  'https://trip-pilot-sigma.vercel.app',
+  'https://trip-pilot-geospatial.vercel.app',
+  ...configuredOrigins
+];
+
+// Any localhost / 127.0.0.1 port is allowed in dev
+const localDevOrigin = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'https://trip-pilot-sigma.vercel.app', // default deployed frontend
-    ...configuredOrigins
-  ],
+  origin: (origin, cb) => {
+    if (!origin || allowedOrigins.includes(origin) || localDevOrigin.test(origin)) {
+      return cb(null, true);
+    }
+    return cb(new Error(`CORS blocked origin: ${origin}`));
+  },
   credentials: true
 }));
 app.use(express.json());
@@ -34,7 +44,13 @@ app.use('/api/trips', require('./routes/tripRoutes'));
 
 // Basic health check route
 app.get('/health', (req, res) => {
-  res.json({ status: 'up', message: 'TripPilot API is running' });
+  const mongoose = require('mongoose');
+  res.json({
+    status: 'up',
+    message: 'TripPilot API is running',
+    dbState: mongoose.connection.readyState === 1 ? 'connected' : 'not connected',
+    dbName: mongoose.connection.name
+  });
 });
 
 // Global Error Handler
