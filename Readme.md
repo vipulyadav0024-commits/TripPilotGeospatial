@@ -1,198 +1,78 @@
-# 🧭 TripPilot — Geospatial Travel Management System
+# 🧭 TripPilot — Geospatial Travel Planner
 
-> AI-powered, map-driven travel planning application — generate personalized day-by-day itineraries with every stop geocoded and plotted on an interactive map, optimize each day's visiting order to cut travel distance, discover what's nearby, estimate budgets, and auto-generate weather-aware packing lists instantly.
-
+An AI-powered travel planning web app. Enter your trip details and it generates a day-by-day itinerary, budget, hotels and packing list. Every stop is placed on an interactive map, and the route for each day can be optimized.
 
 ## 🌐 Live Demo
 
-| Part | URL | Hosted on |
-|------|-----|-----------|
-| 🖥️ **Frontend (app)** | [https://trip-pilot-geospatial.vercel.app](https://trip-pilot-geospatial.vercel.app) | Vercel |
-| ⚙️ **Backend (API)** | [https://trippilot-backend-mtnj.onrender.com](https://trippilot-backend-mtnj.onrender.com) | Render |
-| ❤️ **Health check** | [https://trippilot-backend-mtnj.onrender.com/health](https://trippilot-backend-mtnj.onrender.com/health) | Render |
-| 💻 **Source code** | [https://github.com/vipulyadav0024-commits/TripPilotGeospatial](https://github.com/vipulyadav0024-commits/TripPilotGeospatial) | GitHub |
+| Part | Link |
+|------|------|
+| Frontend (Vercel) | https://trip-pilot-geospatial.vercel.app |
+| Backend API (Render) | https://trippilot-backend-mtnj.onrender.com |
+| Health check | https://trippilot-backend-mtnj.onrender.com/health |
+| Source code | https://github.com/vipulyadav0024-commits/TripPilotGeospatial |
 
-### Health status
-
-| Service | Status | Last verified |
-|---------|--------|---------------|
-| Backend API (`/health`) | ✅ Up | 21 Oct 2026 |
-| Frontend (Vercel) | ✅ Deployed | 21 Oct 2026 |
-| MongoDB Atlas | ✅ Connected | 21 Oct 2026 |
-
-Expected response from the health endpoint:
-
-```json
-{ "status": "up", "message": "TripPilot API is running" }
-```
-
-> ⏳ **Heads-up:** the backend runs on Render's **free tier**, which goes to sleep after about 15 minutes of inactivity.
-> The **first request after a quiet period can take 30–60 seconds** while the server wakes up. Open the
-> [health link](https://trippilot-backend-mtnj.onrender.com/health) first to wake it, then use the app.
-> Opening the bare backend URL shows `Cannot GET /` — this is normal, because the API has no homepage.
-
----
-
-## 📋 Table of Contents
-
-- [Live Demo](#-live-demo)
-- [Overview](#overview)
-- [Features](#features)
-- [Tech Stack & Justification](#tech-stack--justification)
-- [High-Level Architecture](#high-level-architecture)
-- [Project Structure](#project-structure)
-- [Authentication & Authorization Approach](#authentication--authorization-approach)
-- [AI Agent Design](#ai-agent-design)
-- [Creative Feature — Currency Conversion](#creative-feature--currency-conversion-usd--inr)
-- [Key Design Decisions & Trade-offs](#key-design-decisions--trade-offs)
-- [Getting Started](#getting-started)
-- [Environment Variables](#environment-variables)
-- [API Reference](#api-reference)
-- [Deployment Guide (Render + Vercel + Atlas)](#deployment-guide-render--vercel--atlas)
-- [Screenshots](#screenshots)
-- [Known Limitations](#known-limitations)
-- [Future Enhancements](#future-enhancements)
-- [Security](#security)
-
----
-
-## Overview
-
-**TripPilot** is a secure, multi-user, full-stack **geospatial travel management system**. It helps users plan complete trips with artificial intelligence and then turns that plan into real, mapped geography: every activity, meal, hotel and nearby attraction is resolved to real-world coordinates, stored in MongoDB with `2dsphere` geospatial indexes, and rendered on an interactive Leaflet/OpenStreetMap map with per-day routes, road-distance and travel-time estimates, a route optimizer, and a radius-based "what's nearby" search.
-
-Each user's data is completely isolated — no user can access or modify another user's trips. The app supports live USD/INR currency conversion, responsive design across all screen sizes, and gracefully falls back to mock data when the Gemini API key is not configured.
-
-| Part     | Stack                                              | Local URL             | Live URL |
-|----------|-----------------------------------------------------|-----------------------|----------|
-| Frontend | React 19 + Vite + Tailwind CSS + Leaflet/OSM        | http://localhost:5173 | https://trip-pilot-geospatial.vercel.app |
-| Backend  | Node.js + Express + MongoDB (2dsphere) + Nominatim + OSRM | http://localhost:5000 | https://trippilot-backend-mtnj.onrender.com |
+> The backend is on Render's free tier, so it sleeps when idle. The first request can take 30–60 seconds. Open the health link first to wake it up.
+> Click **Create Account** to register before logging in.
 
 ---
 
 ## Features
 
-### 🔐 User Authentication
-- Register with name, email, and password
-- Login with JWT tokens (valid 7 days)
-- Passwords hashed with bcrypt (10 salt rounds)
-- Protected routes — redirects to login if no token found
-
-### 🤖 AI Trip Generation (Google Gemini 2.5 Flash)
-- Enter: departure city, destination, duration, budget tier, interests, travel type, and number of travelers
-- AI generates a complete travel plan including:
-  - Day-by-day itinerary with morning / afternoon / evening activities
-  - Meal recommendations with restaurant names and must-try dishes
-  - Hotel and accommodation suggestions (Budget / Mid-range / Luxury)
-  - Transportation options (flights, trains, local transport)
-  - Daily and total budget breakdown
-  - Weather-aware packing list
-  - Cultural, safety, food, and health tips
-  - Nearby attractions for day trips
-  - Emergency contact numbers
-
-### 📅 Trip Management
-- View all saved trips in sidebar
-- Create, update, and delete trips
-- Add custom activities to any day
-- Regenerate a specific day with custom AI instructions
-- Toggle packing list items (packed / unpacked)
-
-### 💱 Currency Conversion (USD / INR) — Creative Feature
-- Toggle between $ USD and ₹ INR anywhere in the dashboard
-- Live exchange rate fetched at trip creation via ExchangeRate API
-- Preference persisted in localStorage across sessions
-
-### 📱 Fully Responsive
-- Desktop: full sidebar layout
-- Mobile: hamburger menu, trip drawer, username visible in top bar
-- Smooth animations and transitions throughout
-
-### 🗺️ Geospatial Engine — Core Feature
-- **Automatic geocoding** — every activity, meal, hotel and nearby attraction is resolved to a real `[longitude, latitude]` point via the AI's own estimate, then validated and, if missing or implausible, looked up with **OpenStreetMap Nominatim** and flagged (`ai` / `geocoded` / `approximate`) so the UI always shows *how* trustworthy a pin is
-- **MongoDB `2dsphere` indexes** on every location field (`destinationGeo`, `originGeo`, activities, meals, accommodation) enabling native `$near` / `$geoWithin` queries
-- **Interactive Leaflet map** per trip: colour-coded pins by day, popups with stop details, a day filter, an origin→destination distance readout, and a "You are here" locate-me control
-- **Per-day route drawing** from hotel → activities in visiting order, with road-distance estimated via **OSRM** (falls back to a great-circle × road-factor estimate if OSRM is unreachable) and human travel-time estimates
-- **Route optimization** — a TSP-style solver (exact branch-and-bound for ≤8 stops, nearest-neighbour + 2-opt for more) proposes the shortest visiting order for a day's activities starting from the hotel, shows the distance/time saved, and can reorder the itinerary's time slots in one click
-- **Nearby search** — tap any pin and search a configurable radius (0.5–20 km) for other stops in the trip, sorted by distance with compass direction (e.g. "1.2 km NE")
-- **Self-healing coordinates** — a "Locate missing stops" action re-geocodes any pin that failed or was only approximated, without needing to regenerate the whole trip
+- **Login / Register** with JWT authentication
+- **AI trip generation** using Google Gemini: itinerary, meals, hotels, transport, budget, packing list and travel tips
+- **Trip management:** create, view, update and delete trips, add custom activities, regenerate a single day with AI
+- **Interactive map** (Leaflet + OpenStreetMap): every stop is shown as a pin, with a route drawn for each day
+- **Route optimization:** finds the shortest visiting order for a day's activities
+- **Nearby search:** find other stops in the trip within a chosen radius
+- **USD / INR currency toggle:** the exchange rate is saved when the trip is created
+- **Responsive design** for desktop and mobile
 
 ---
 
-## Tech Stack & Justification
+## Tech Stack
 
-### Frontend — React 19 + Vite (instead of Next.js)
-
-The assignment listed Next.js as a *preferred* stack, not a mandatory one. I chose **React 19 with Vite** for the following reasons:
-
-- This application is entirely **client-side and auth-gated** — no public-facing pages require SEO or server-side rendering, which are Next.js's primary advantages.
-- Vite provides **significantly faster HMR and build times** compared to the Next.js dev server, improving developer experience.
-- React + Vite is a **lighter, simpler setup** — less configuration overhead, no file-based routing complexity, and easier to reason about for a single-page dashboard application.
-- The eligibility criteria for this role specifically lists **React JS**, not Next.js — confirming React is the right fit.
-
-### Backend — Node.js + Express
-- Minimal, flexible REST API framework — ideal for building a clean, resource-based API.
-- Large ecosystem, strong community, and well-suited for async-heavy operations like LLM API calls.
-
-### Database — MongoDB + Mongoose
-- Schema-flexible document model suits travel itinerary data (variable number of days, activities, hotels).
-- Mongoose ODM provides schema validation and clean model definitions.
-- MongoDB Atlas offers free-tier cloud hosting — no local DB setup required for evaluators.
-- **Geospatial support is native**: every location is stored as a GeoJSON `Point`, and `2dsphere` indexes let the API run real `$near` queries instead of computing distance in application code for every request.
-
-### Geospatial Stack — Nominatim + OSRM + Leaflet
-- **OpenStreetMap Nominatim** for forward/reverse geocoding — free, no API key, no billing risk for a student project. Requests are rate-limited to 1/sec with an in-memory cache, per Nominatim's usage policy.
-- **OSRM** (Open Source Routing Machine) for real road-network distance/duration between stops, with an automatic straight-line-distance fallback so the app degrades gracefully if the public OSRM server is briefly unavailable.
-- **Leaflet + OpenStreetMap tiles** on the frontend — a mature, dependency-light mapping library that needs no API key or credit card, unlike Google Maps JavaScript API.
-- All geospatial math (Haversine distance, bearings, bounding boxes, route optimization) lives in a pure, dependency-free `utils/geo.js` module so it's easy to unit test and to explain/justify in a project report.
-
-### AI — Google Gemini 2.5 Flash
-- **High speed + structured JSON output** — critical for a good UX when generating full itineraries.
-- `responseMimeType: "application/json"` forces valid JSON output, eliminating unreliable regex parsing.
-- Free tier is generous enough for development and evaluation purposes.
-- The prompt now also asks for a real decimal `latitude`/`longitude` per stop; these are treated as a *first guess* only — the backend validates them against the destination's area and re-geocodes anything implausible, since LLMs can hallucinate coordinates.
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 19, Vite, Tailwind CSS, React Router |
+| Map | Leaflet + OpenStreetMap |
+| Backend | Node.js, Express |
+| Database | MongoDB Atlas with Mongoose (2dsphere geospatial indexes) |
+| AI | Google Gemini 2.5 Flash |
+| Geocoding | OpenStreetMap Nominatim |
+| Routing | OSRM (road distance and travel time) |
+| Auth | JWT + bcryptjs |
+| Hosting | Vercel (frontend), Render (backend), MongoDB Atlas (database) |
 
 ---
 
-## High-Level Architecture
+## How It Works
 
 ```
-┌─────────────────────────────────────────────────┐
-│              React 19 Client (Vite)             │
-│   Auth State · Trip Form · Dashboard UI         │
-└────────────────┬────────────────▲───────────────┘
-                 │                │
-          REST API calls    JSON Responses
-      (JWT in Auth Header)  (User-isolated)
-                 │                │
-┌────────────────▼────────────────┼───────────────┐
-│           Express.js REST API Server            │
-│  ┌──────────────────────────────────────────┐  │
-│  │            JWT Auth Middleware           │  │
-│  │  Decodes token → attaches req.user.id   │  │
-│  └────────────────┬─────────────────────────┘  │
-│                   │                            │
-│       ┌───────────┴───────────┐                │
-│       ▼                       ▼                │
-│  ┌─────────────┐       ┌─────────────┐         │
-│  │ Trip Routes │       │ Auth Routes │         │
-│  └──────┬──────┘       └──────┬──────┘         │
-└─────────┼────────────────────┼─────────────────┘
-          │                    │
-    ┌─────┴──────┐      ┌──────┴──────┐
-    ▼            ▼      ▼             ▼
-┌────────┐ ┌─────────┐ ┌───────────────────┐
-│Gemini  │ │ MongoDB │ │  ExchangeRate API  │
-│AI API  │ │  Trips  │ │  (USD → INR rate)  │
-└────────┘ └─────────┘ └───────────────────┘
+React app (Vercel)  →  Express API (Render)  →  MongoDB Atlas
+                              │
+                              ├→ Gemini AI (generates the itinerary)
+                              ├→ Nominatim (finds coordinates for places)
+                              └→ OSRM (road distance and time)
 ```
 
-**Data flow for trip generation:**
-1. User submits trip preferences from `CreateTripForm`
-2. Frontend sends `POST /api/trips` with JWT in header
-3. Auth middleware verifies token, attaches `req.user.id`
-4. Controller fetches live exchange rate, then calls Gemini API with structured prompt
-5. Gemini returns a JSON itinerary — saved to MongoDB with `userId` field
-6. Response returned to client; dashboard re-renders with new trip
+1. The user fills in the trip form and the frontend sends `POST /api/trips` with the JWT.
+2. The backend verifies the token and asks Gemini for a JSON itinerary.
+3. Each stop gets coordinates, and Nominatim is used when the AI's coordinates are missing or wrong.
+4. The trip is saved in MongoDB with the user's id.
+5. The frontend shows the itinerary and the map.
+
+---
+
+## Authentication
+
+- **Register:** the password is hashed with bcrypt, the user is saved, and a JWT valid for 7 days is returned.
+- **Login:** the password is checked with `bcrypt.compare`, and a JWT is returned and stored in `localStorage`.
+- **Protected routes:** the auth middleware reads the `Authorization: Bearer <token>` header, verifies it and sets `req.user`.
+- **Data isolation:** every trip stores a `userId`, and all queries filter by it, so a user can only see their own trips.
+
+```js
+const trips = await Trip.find({ userId: req.user.id });
+```
 
 ---
 
@@ -200,477 +80,118 @@ The assignment listed Next.js as a *preferred* stack, not a mandatory one. I cho
 
 ```
 TripPilotGeospatial/
-├── Readme.md
-├── .gitignore
-├── assets/
-│   ├── favicon.png
-│   ├── TravelApp1.jpg             # Screenshot - Home page
-│   ├── TravelApp2.jpg             # Screenshot - Dashboard
-│   ├── TravelApp3.jpg             # Screenshot - Trip details
-│   └── TravelApp4.jpg             # Screenshot - Create trip / mobile
-│
 ├── backend/
-│   ├── config/
-│   │   └── db.js                  # MongoDB connection via Mongoose
-│   ├── controllers/
-│   │   ├── authController.js      # Register, login, profile
-│   │   └── tripController.js      # Trip CRUD + AI generation
-│   ├── middleware/
-│   │   └── auth.js                # JWT verification — protects all trip routes
-│   ├── models/
-│   │   ├── User.js                # User schema (email, hashed password)
-│   │   └── Trip.js                # Trip schema — GeoJSON Points + 2dsphere indexes on every stop
-│   ├── routes/
-│   │   ├── authRoutes.js          # /api/auth/*
-│   │   └── tripRoutes.js          # /api/trips/* (incl. geo, nearby, optimize-day)
-│   ├── services/
-│   │   ├── geocoder.js            # Nominatim client — rate-limited, cached, never throws
-│   │   ├── routing.js             # OSRM road-routing client with straight-line fallback
-│   │   └── geoService.js          # Enrichment, map view builder, nearby search, route optimizer
-│   ├── utils/
-│   │   └── geo.js                 # Pure geospatial math: Haversine, bearing, TSP solver, bbox
-│   ├── .env.example               # Environment variable template
-│   └── server.js                  # Express entry point
-│
+│   ├── config/db.js              # MongoDB connection
+│   ├── controllers/              # authController, tripController
+│   ├── middleware/auth.js        # JWT verification
+│   ├── models/                   # User, Trip
+│   ├── routes/                   # authRoutes, tripRoutes
+│   ├── services/                 # geocoder, routing, geoService
+│   ├── utils/geo.js              # distance and route optimization math
+│   └── server.js
 └── frontend/
-    ├── vercel.json                    # SPA rewrite so page refreshes work on Vercel
-    ├── .env.example                   # VITE_API_URL template
     └── src/
-        ├── components/
-        │   ├── LandingPage.jsx        # Marketing / home page
-        │   ├── LandingNavbar.jsx      # Landing page navigation
-        │   ├── Login.jsx              # Login form
-        │   ├── Register.jsx           # Registration form
-        │   ├── Dashboard.jsx          # Main trip planner UI
-        │   ├── TripGeoPanel.jsx       # Map workspace: day filter, optimizer, nearby search
-        │   ├── TripMap.jsx            # Leaflet/OpenStreetMap map (pins, per-day routes)
-        │   ├── Navbar.jsx             # Dashboard top bar
-        │   ├── NavUserGreeting.jsx    # Personalized "Hi, Username" greeting
-        │   ├── CreateTripForm.jsx     # Multi-step trip creation modal
-        │   └── CurrencyToggle.jsx     # USD/INR toggle + useCurrency hook
-        ├── App.jsx                    # Route definitions (React Router DOM)
-        ├── main.jsx                   # React entry point
-        └── index.css                  # Global styles + animations
+        ├── components/           # Login, Register, Dashboard, TripMap, ...
+        ├── App.jsx               # routes
+        └── main.jsx
 ```
 
 ---
 
-## Authentication & Authorization Approach
+## Run Locally
 
-### Registration
-1. User submits name, email, and password
-2. Backend checks if email already exists
-3. Password hashed using `bcryptjs` with 10 salt rounds — plain text is never stored
-4. User document saved to MongoDB
-5. JWT signed with `JWT_SECRET` and returned to client (valid 7 days)
-
-### Login
-1. User submits email and password
-2. Backend fetches user by email; runs `bcrypt.compare()` against stored hash
-3. On match, a new JWT is signed and returned
-4. Token stored in `localStorage` on the client
-
-### Authorization (every protected request)
-```
-Request → auth.js middleware
-  → Reads "Authorization: Bearer <token>" header
-  → jwt.verify(token, JWT_SECRET)
-  → Attaches decoded payload as req.user
-  → next() — proceeds to route handler
-```
-
-### Data Isolation
-Every trip document in MongoDB stores a `userId` field (ObjectId ref to the User model). All trip queries are scoped to `{ userId: req.user.id }`:
-
-```js
-// Only returns trips belonging to the authenticated user
-const trips = await Trip.find({ userId: req.user.id });
-
-// Update only works if the trip belongs to this user
-const trip = await Trip.findOne({ _id: req.params.id, userId: req.user.id });
-```
-
-This ensures **zero cross-user data leakage** — even if a user guesses another trip's `_id`, the query returns null.
-
----
-
-## AI Agent Design
-
-### Model
-**Google Gemini 2.5 Flash** — chosen for speed, accuracy, and reliable structured output.
-
-### Prompt Engineering
-The AI agent receives a structured system prompt that:
-- Defines the exact JSON schema to return (itinerary, hotels, budget, packing list)
-- Includes destination, duration, budget tier, interests, travel type, and traveler count
-- Specifies realistic local pricing relative to the budget tier
-- Instructs the model to include morning/afternoon/evening time slots
-
-Using `responseMimeType: "application/json"` in the generation config forces Gemini to return valid, parseable JSON — no regex stripping or error-prone text parsing required.
-
-### Regenerate Day Feature
-When a user requests a day regeneration, the backend:
-1. Fetches the existing trip from MongoDB
-2. Sends the full trip context + the user's custom prompt to Gemini
-3. Receives an updated activities array for that specific day
-4. Patches only that day in the itinerary array and saves back to MongoDB
-
-This avoids regenerating the entire trip, saving tokens and preserving the user's other customizations.
-
-### Resilience
-- Exponential backoff retry logic (up to 5 retries: 1s → 2s → 4s → 8s → 16s) handles Gemini API rate limits and transient failures
-- Mock data fallback — if `GEMINI_API_KEY` is not set, the app returns a realistic sample itinerary so the UI remains fully demonstrable without API credentials
-
----
-
-## Creative Feature — Currency Conversion (USD / INR)
-
-### Why I Built This
-
-Travel budgets in most AI tools are returned in USD. However, the primary users of an Indian travel planning app think and budget in **Indian Rupees (INR)**. Presenting costs only in USD creates a cognitive friction — users must mentally convert every figure before it becomes meaningful.
-
-### What Problem It Solves
-
-This feature eliminates that friction by letting users toggle between USD and INR **anywhere budget figures appear** — budget breakdown, activity costs, hotel prices — with a single click.
-
-### How It Works
-
-1. When a trip is created, the backend fetches the **live USD → INR exchange rate** from the ExchangeRate API
-2. The rate is stored alongside the trip in MongoDB, locking in the rate at the time of generation (avoids inconsistency on future views)
-3. The `useCurrency` hook (inside `CurrencyToggle.jsx`) exposes a `convert(amount)` function and a `symbol` string (`$` or `₹`) globally across the dashboard
-4. The user's currency preference is saved to `localStorage` so it persists across sessions and page refreshes
-
-### Engineering Judgment
-
-Storing the exchange rate at trip creation time rather than fetching it live on every render was a deliberate decision — it ensures budget figures remain consistent and don't change unexpectedly due to rate fluctuations after the trip was planned.
-
----
-
-## Key Design Decisions & Trade-offs
-
-| Decision | Rationale | Trade-off |
-|---|---|---|
-| React + Vite over Next.js | App is fully auth-gated; no SSR/SEO needed. Faster dev experience. | No server-side rendering; slightly worse cold-load performance on slow connections. |
-| JWT in localStorage | Simple, stateless auth; works seamlessly with REST APIs. | Vulnerable to XSS — httpOnly cookies would be more secure in production. |
-| Store exchange rate at trip creation | Budget figures stay consistent regardless of future rate changes. | Rate is frozen — does not reflect real-time currency movement. |
-| Gemini `responseMimeType: "application/json"` | Guarantees valid JSON output; eliminates brittle text parsing. | Slightly reduces model creativity — constrained to schema. |
-| Mock data fallback | Evaluators can run the app without a Gemini API key. | Mock data is static — does not demonstrate full AI capability without a real key. |
-| MongoDB over SQL | Itinerary structure is deeply nested and variable (different days, activities per trip). | Less suited for complex relational queries — acceptable for this use case. |
-
----
-
-## Getting Started
-
-### Prerequisites
-- Node.js v18 or higher
-- MongoDB (local or MongoDB Atlas cloud — free tier works)
-- Google Gemini API key (optional — mock data used if missing)
-
-### 1. Clone the Repository
+**Requirements:** Node.js 18+, a MongoDB database (local or Atlas), and optionally a Gemini API key.
 
 ```bash
 git clone https://github.com/vipulyadav0024-commits/TripPilotGeospatial.git
 cd TripPilotGeospatial
 ```
 
-### 2. Setup Backend
-
+**Backend**
 ```bash
 cd backend
 npm install
-cp .env.example .env
-# Fill in your values in .env
-npm run dev
+cp .env.example .env     # then fill in the values
+npm run dev              # runs on http://localhost:5000
 ```
 
-Backend starts at **http://localhost:5000**
-
-### 3. Setup Frontend
-
+**Frontend**
 ```bash
 cd frontend
 npm install
-npm run dev
+cp .env.example .env
+npm run dev              # runs on http://localhost:5173
 ```
-
-Frontend starts at **http://localhost:5173**
 
 ---
 
 ## Environment Variables
 
-### Backend (`backend/.env`)
+**Backend (`backend/.env`)**
 
-```env
-PORT=5000
-MONGO_URI=mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/trippilot?retryWrites=true&w=majority
-JWT_SECRET=your_super_secure_random_secret_key
-GEMINI_API_KEY=your_google_gemini_api_key
-CORS_ORIGINS=https://trip-pilot-geospatial.vercel.app
-GEOCODER_USER_AGENT=TripPilot-Geospatial-Travel-System/1.0 (your-email@example.com)
-```
+| Variable | Required | Purpose |
+|----------|----------|---------|
+| `MONGO_URI` | Yes | MongoDB connection string |
+| `JWT_SECRET` | Yes | Secret used to sign tokens |
+| `GEMINI_API_KEY` | No | Gemini key (sample data is used if missing) |
+| `CORS_ORIGINS` | No | Allowed frontend URL(s), comma-separated |
+| `PORT` | No | Server port (default 5000) |
 
-| Variable               | Required | Description                                                     |
-|------------------------|----------|-------------------------------------------------------------------|
-| `PORT`                 | No       | Server port (default: 5000)                                     |
-| `MONGO_URI`            | Yes      | MongoDB connection string                                        |
-| `JWT_SECRET`           | Yes      | Secret key for signing JWT tokens                                 |
-| `GEMINI_API_KEY`       | No       | Gemini API key (mock data used if not provided)                  |
-| `CORS_ORIGINS`         | No       | Comma-separated extra allowed frontend origins                    |
-| `GEOCODER_USER_AGENT`  | No       | User-Agent sent to Nominatim (its usage policy requires one)      |
-| `NOMINATIM_URL`        | No       | Alternate/self-hosted Nominatim instance                          |
-| `OSRM_DRIVING_URL`     | No       | Alternate/self-hosted OSRM driving-profile instance                |
-| `OSRM_WALKING_URL`     | No       | Alternate/self-hosted OSRM walking-profile instance                |
+**Frontend (`frontend/.env`)**
 
-### Frontend (`frontend/.env`)
-
-```env
-VITE_API_URL=http://localhost:5000
-```
-
-> For production, set `VITE_API_URL` to your deployed backend URL — this project uses `https://trippilot-backend-mtnj.onrender.com` (no trailing slash).
-> `VITE_` variables are baked in at build time, so **redeploy Vercel after changing it**.
+| Variable | Purpose |
+|----------|---------|
+| `VITE_API_URL` | Backend URL, e.g. `http://localhost:5000` (no trailing slash) |
 
 ---
 
-## API Reference
+## API Endpoints
 
-Base URL (local): `http://localhost:5000`  
-Base URL (live): `https://trippilot-backend-mtnj.onrender.com`
+**Auth**
 
-### Health Check
-```
-GET /health
-```
-Try it live: [https://trippilot-backend-mtnj.onrender.com/health](https://trippilot-backend-mtnj.onrender.com/health)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/register` | Create account |
+| POST | `/api/auth/login` | Login and get JWT |
+| GET | `/api/auth/me` | Get current user |
 
-### Authentication
+**Trips** (JWT required)
 
-| Method | Endpoint            | Auth | Description        |
-|--------|---------------------|------|--------------------|
-| POST   | /api/auth/register  | No   | Create new account |
-| POST   | /api/auth/login     | No   | Login, receive JWT |
-| GET    | /api/auth/me        | Yes  | Get user profile   |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/trips` | Generate and save a trip |
+| GET | `/api/trips` | List the user's trips |
+| GET | `/api/trips/:id` | Get one trip |
+| PUT | `/api/trips/:id` | Update a trip |
+| DELETE | `/api/trips/:id` | Delete a trip |
+| POST | `/api/trips/:id/regenerate-day` | Regenerate one day with AI |
+| GET | `/api/trips/:id/geo` | Map data (pins and routes) |
+| GET | `/api/trips/:id/nearby` | Stops within a radius |
+| GET/POST | `/api/trips/:id/optimize-day/:n` | Preview / apply the optimized route for a day |
 
-### Trips (all require `Authorization: Bearer <token>`)
-
-| Method | Endpoint                        | Description                    |
-|--------|---------------------------------|--------------------------------|
-| POST   | /api/trips                      | Generate and save a new trip (auto-geocodes every stop) |
-| GET    | /api/trips                      | Get all trips for current user |
-| GET    | /api/trips/:id                  | Get a single trip              |
-| PUT    | /api/trips/:id                  | Update trip fields             |
-| DELETE | /api/trips/:id                  | Delete a trip                  |
-| POST   | /api/trips/:id/regenerate-day   | Regenerate one day with AI     |
-| GET    | /api/trips/geocode?q=           | Ad-hoc place search (Nominatim) |
-| GET    | /api/trips/:id/geo              | Map-ready GeoJSON view: pins, per-day routes, totals |
-| POST   | /api/trips/:id/geo/refresh      | Re-geocode missing/approximate stops (`{ force, dayNumber }`) |
-| GET    | /api/trips/:id/nearby           | Stops within a radius of a point (`?lat=&lng=&radiusKm=&kinds=`) |
-| GET    | /api/trips/:id/optimize-day/:n  | Preview the shortest visiting order for day `n` |
-| POST   | /api/trips/:id/optimize-day/:n  | Apply the optimized visiting order to day `n` |
-
-#### Create Trip — Request Body
-```json
-{
-  "from": "Mumbai",
-  "destination": "Goa",
-  "durationDays": 3,
-  "budgetTier": "Medium",
-  "interests": ["Beach", "Food & Dining", "Nightlife"],
-  "travelType": "friends",
-  "travelers": 4
-}
-```
-
-#### Regenerate Day — Request Body
-```json
-{
-  "dayNumber": 2,
-  "prompt": "Make it more beach-focused with water sports"
-}
-```
+**Other:** `GET /health` shows the server status and the database connection.
 
 ---
 
-## Deployment Guide (Render + Vercel + Atlas)
+## Deployment
 
-Architecture in production:
-
-```
-Browser ──► Vercel (React frontend) ──► Render (Express API) ──► MongoDB Atlas
-                                              │
-                                              ├──► Google Gemini API
-                                              ├──► OpenStreetMap Nominatim (geocoding)
-                                              └──► OSRM (road routing)
-```
-
-### 1. Database — MongoDB Atlas
-1. Create a free **M0** cluster at [mongodb.com/atlas](https://www.mongodb.com/atlas).
-2. **Database Access** → add a user (use a letters-and-numbers password to avoid URL-encoding issues).
-3. **Network Access** → add `0.0.0.0/0` (Render's free tier has no fixed IP).
-4. **Connect → Drivers** → copy the connection string and add the database name before the `?`:
-   ```
-   mongodb+srv://USER:PASSWORD@cluster0.xxxxx.mongodb.net/trippilot?retryWrites=true&w=majority
-   ```
-
-### 2. Backend — Render
-1. Push the repo to GitHub.
-2. Render → **New + → Web Service** → connect the repo.
-3. Settings:
-
-   | Setting | Value |
-   |---|---|
-   | Root Directory | `backend` |
-   | Runtime | Node |
-   | Build Command | `npm install` |
-   | Start Command | `npm start` |
-   | Instance Type | Free |
-
-4. Environment variables:
-
-   | Key | Value |
-   |---|---|
-   | `MONGO_URI` | your Atlas connection string |
-   | `JWT_SECRET` | a long random string |
-   | `GEMINI_API_KEY` | your Google AI Studio key |
-   | `GEOCODER_USER_AGENT` | `TripPilot/1.0 (your-email@example.com)` |
-   | `CORS_ORIGINS` | your Vercel URL (added in step 4 below) |
-
-   `PORT` is set by Render automatically.
-5. Deploy, then open `/health` on your service URL to confirm it is up.
-
-### 3. Frontend — Vercel
-1. Make sure `frontend/vercel.json` exists (it is already in this repo):
-   ```json
-   { "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }
-   ```
-   Without it, refreshing any page except `/` returns a 404.
-2. Vercel → **Add New → Project** → import the repo.
-3. Settings:
-
-   | Setting | Value |
-   |---|---|
-   | Framework Preset | Vite |
-   | Root Directory | `frontend` |
-   | Build Command | `npm run build` |
-   | Output Directory | `dist` |
-
-4. Environment variable: `VITE_API_URL` = your Render URL (no trailing `/`).
-5. Deploy.
-
-### 4. Connect frontend and backend (CORS)
-The backend only accepts requests from approved origins. After the first Vercel deploy:
-1. Render → your service → **Environment** → add
-   `CORS_ORIGINS` = `https://trip-pilot-geospatial.vercel.app` (no trailing slash, no spaces).
-2. Save — Render redeploys automatically.
-3. Hard-refresh the site (Ctrl + Shift + R) and register an account.
-
-To allow several origins (for example a custom domain), separate them with commas.
-
-### Troubleshooting
-
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| Browser console: *blocked by CORS policy* / "Failed to fetch" | `CORS_ORIGINS` missing or does not match the Vercel URL exactly | Set it to the exact origin, no trailing `/`, then wait for Render to redeploy |
-| Backend URL shows `Cannot GET /` | Normal — the API has no homepage | Use `/health` |
-| First request is very slow | Render free tier was asleep | Wait 30–60 s, or open `/health` first |
-| "Cannot reach the server" in the app | `VITE_API_URL` wrong, or Vercel not redeployed after changing it | Fix the variable and redeploy Vercel |
-| 404 after refreshing a page on Vercel | `vercel.json` rewrite missing | Add `frontend/vercel.json` and redeploy |
-| Backend crashes on start / `Error connecting to MongoDB` | Wrong password in `MONGO_URI` or Atlas IP allowlist | Check credentials and that `0.0.0.0/0` is allowed |
-| Trips show sample data and a notice | `GEMINI_API_KEY` missing or invalid | Add a valid key in Render |
-| Some map pins marked *approximate* | Nominatim/OSRM free-tier limits | Use **Locate missing stops** in the map panel |
-
-### Keeping secrets safe
-- Never commit `.env` files (they are in `.gitignore`).
-- Never paste real passwords or API keys into chats, issues, or this README.
-- If a key or password is ever exposed, rotate it immediately (Atlas → Database Access, Google AI Studio → API keys) and update it in Render.
+1. **Database:** create a free MongoDB Atlas cluster, add a database user, and allow `0.0.0.0/0` under Network Access.
+2. **Backend (Render):** set Root Directory to `backend`, Build Command to `npm install` and Start Command to `npm start`. Add the environment variables `MONGO_URI`, `JWT_SECRET`, `GEMINI_API_KEY` and `CORS_ORIGINS` (the Vercel URL).
+3. **Frontend (Vercel):** set Root Directory to `frontend` and add `VITE_API_URL` (the Render URL). Redeploy after changing it, because Vite reads it at build time.
 
 ---
 
-## Screenshots
-
-Captured from the live app at [https://trip-pilot-geospatial.vercel.app](https://trip-pilot-geospatial.vercel.app).
-
-### Home Page
-<p align="center">
-  <img src="assets/TravelApp1.jpg" alt="TripPilot - Home Page" width="900" />
-</p>
-<p align="center"><em>Landing page with hero section, features overview, and navigation</em></p>
-
-### Dashboard
-<p align="center">
-  <img src="assets/TravelApp2.jpg" alt="TripPilot - Dashboard" width="900" />
-</p>
-<p align="center"><em>Trip dashboard with saved trips sidebar and trip overview</em></p>
-
-### Trip Details
-<p align="center">
-  <img src="assets/TravelApp3.jpg" alt="TripPilot - Trip Details" width="900" />
-</p>
-<p align="center"><em>AI-generated itinerary, budget breakdown, and day-by-day activities</em></p>
-
-### Create Trip & Mobile View
-<p align="center">
-  <img src="assets/TravelApp4.jpg" alt="TripPilot - Create Trip" width="900" />
-</p>
-<p align="center"><em>Create trip form with travel preferences and responsive mobile layout</em></p>
-
----
-
-## Local Storage Keys
-
-| Key              | Values     | Purpose                       |
-|------------------|------------|-------------------------------|
-| `token`          | JWT string | Authentication                |
-| `userName`       | String     | Display name in navbar        |
-| `trippilot_currency`  | USD / INR  | Currency preference           |
 
 ---
 
 ## Known Limitations
 
-- **JWT in localStorage** — susceptible to XSS attacks. Production-grade apps should use httpOnly cookies.
-- **Exchange rate is frozen at trip creation** — does not reflect live currency fluctuations after the trip is saved.
-- **Gemini API dependency** — without a valid API key, the app falls back to static mock data. Mock itineraries are not destination-specific.
-- **No email verification** — users can register with any email address without verification.
-- **No pagination** — if a user creates many trips, all are loaded at once. Could cause performance issues at scale.
-- **Single-currency base** — budgets are generated in USD by the AI; INR is a client-side conversion only.
-- **Free geocoding/routing tier** — Nominatim (1 request/sec) and the public OSRM server can be slow or briefly unavailable under load; the app degrades gracefully (approximate pins, straight-line distance) rather than failing, but a self-hosted instance would be more robust for real production traffic.
-- **Route optimization is geometric, not live-traffic-aware** — it minimizes road-distance/estimated time, not real-time congestion, opening hours, or ticket time slots.
+- The JWT is stored in `localStorage`, which is exposed to XSS. httpOnly cookies would be safer.
+- Without a Gemini key, the app shows static sample data.
+- Free-tier geocoding and routing (Nominatim, OSRM) can be slow, so the app falls back to approximate pins and straight-line distance.
+- No email verification or password reset.
+- Free-tier hosting means a slow first request after inactivity.
 
 ---
 
-## Future Enhancements
-
-- 📄 Export trip as PDF or shareable public link
-- 🌦️ Real-time weather API integration for dynamic packing suggestions
-- 🌙 Dark / Light mode toggle
-- 👥 Trip collaboration — share and co-edit with friends
-- 🔑 Forgot password / email-based password reset
-- ✏️ Profile edit page
-- 🌐 Multi-language support
-- 🔄 Refresh token mechanism for seamless session extension
-- 🧭 Turn-by-turn navigation handoff to a native maps app
-- 📍 "Add activity by dropping a pin" instead of typing a name
-- 🚦 Multi-day, multi-city route optimization (not just within a single day)
-
----
-
-## Security
-
-- Passwords never stored in plain text — bcrypt with 10 salt rounds
-- JWT tokens expire after 7 days
-- All trip endpoints verify `userId` matches the authenticated token owner
-- `.env` file is gitignored and never committed to version control
-- CORS allow-list: only localhost (dev), the configured Vercel origin and anything listed in `CORS_ORIGINS` can call the API
-- Exponential backoff prevents API key abuse under rate-limiting scenarios
-
----
-
-## License
-
-This project is for educational and personal use.
-
----
-
-**Built with ❤️ using React, Node.js, and Google Gemini AI**
+Built with React, Node.js, MongoDB and Google Gemini.
